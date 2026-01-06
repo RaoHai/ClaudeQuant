@@ -5,11 +5,14 @@
 ## 核心特性
 
 - 🤖 **AI 驱动**: 利用 Claude 的智能分析能力
-- 📊 **实时行情**: 获取最新股票行情（15分钟延迟）
+- 📊 **实时行情**: 获取最新股票行情（来自 AkShare）
 - 📈 **技术分析**: 自动计算 MA、MACD、RSI、布林带等指标
+- 💰 **资金面分析**: 主力资金流向、机构持仓、股东增减持
+- 🔍 **深度挖掘**: 自动提取对外投资、概念板块、隐藏关联
 - 💡 **智能建议**: 基于技术指标给出买入/卖出/持有建议
 - 📝 **Markdown 报告**: 生成易读的分析报告
 - ⚡ **Skills 集成**: 通过 Claude Code Skills 对话式交互
+- 🆓 **完全免费**: 使用 AkShare 数据源，无需 Token
 
 ## 快速开始
 
@@ -30,12 +33,14 @@ cp .env.example .env
 配置你的持仓代码：
 
 ```env
-# Tushare Token (注册: https://tushare.pro/)
-TUSHARE_TOKEN=your_token_here
-
-# 持仓股票代码（逗号分隔）
+# 持仓股票代码（逗号分隔，不带市场后缀）
 PORTFOLIO_SYMBOLS=600519,000858,601318
+
+# 日志级别（可选）
+LOG_LEVEL=INFO
 ```
+
+**注意**：数据源使用 AkShare，完全免费，无需注册或 Token。
 
 ### 3. 使用 Claude Code Skills
 
@@ -75,10 +80,26 @@ Claude 会自动调用 Skills 获取数据并分析。
 - RSI 指标
 - 综合买卖信号
 
+### `/fundamental <代码>` - 基本面分析 🆕
+
+```bash
+./.claude/skills/fundamental/fundamental.sh 002202
+```
+
+分析资金面、机构持仓、股东增减持。
+
+### `/deep <代码>` - 深度挖掘 🔥🆕
+
+```bash
+./.claude/skills/deep/deep.sh 002202
+```
+
+挖掘隐藏信息：对外投资、概念板块、关联企业。
+
 ### `/analyze` - 完整分析报告
 
 ```bash
-./skills/analyze.sh
+./.claude/skills/analyze/analyze.sh
 ```
 
 生成所有持仓股票的完整分析报告，保存为 Markdown 文件。

@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 依赖包括：
 - `pandas>=2.0.0` - 数据处理
-- `tushare>=1.3.0` - 行情数据源
+- `akshare>=1.12.0` - 行情数据源（免费，无需 Token）
 - `click>=8.1.0` - CLI 工具
 - `python-dotenv>=1.0.0` - 环境变量管理
 
@@ -37,9 +37,6 @@ cp .env.example .env
 
 配置内容：
 ```env
-# Tushare Token (注册: https://tushare.pro/)
-TUSHARE_TOKEN=your_token_here
-
 # 持仓股票代码（逗号分隔，不带市场后缀）
 PORTFOLIO_SYMBOLS=600519,000858,601318
 
@@ -48,9 +45,9 @@ LOG_LEVEL=INFO
 ```
 
 **重要提示**：
-- Tushare Token 可在 https://tushare.pro/ 免费注册获取
 - 股票代码格式：深圳 `000001`、上海 `600519`、北交所 `430090`
 - 系统会自动识别市场并添加后缀（.SZ/.SH/.BJ）
+- 数据源使用 AkShare，完全免费，无需注册或 Token
 
 ### 3. 使用 Claude Code Skills
 
@@ -106,12 +103,17 @@ ClaudeQuant/
 
 ### 1. QuoteProvider (src/quote/provider.py)
 
-行情数据提供者，负责从 Tushare 获取股票数据。
+行情数据提供者，负责从 AkShare 获取股票数据。
 
 **主要方法**：
 - `get_realtime_quote(symbol)` - 获取实时行情
 - `get_historical_data(symbol, days)` - 获取历史K线数据
 - `get_portfolio_quotes(symbols)` - 批量获取持仓行情
+
+**数据源**：
+- 使用 AkShare 接口，数据来自东方财富
+- 完全免费，无需注册或 Token
+- 无频率限制
 
 **使用示例**：
 ```python
@@ -309,24 +311,16 @@ report:
 
 ## 常见问题
 
-### Q: Tushare Token 获取失败？
-
-A: 访问 https://tushare.pro/ 注册账号，在个人中心获取 Token。免费账号有一定积分限制。
-
-### Q: 提示"没有接口访问权限"？
-
-A: Tushare 部分接口需要积分。可以通过以下方式获取积分：
-- 完成注册（200积分）
-- 邀请好友
-- 分享到社交媒体
-- 或使用免费的实时行情接口（已在代码中处理）
-
 ### Q: 如何添加或修改持仓？
 
 A: 编辑 `.env` 文件中的 `PORTFOLIO_SYMBOLS`：
 ```env
 PORTFOLIO_SYMBOLS=600519,000858,601318,000333
 ```
+
+### Q: 数据源准确吗？
+
+A: 项目使用 AkShare 数据源，来自东方财富网，数据质量可靠。实时行情和资金流向数据都是免费且准确的。
 
 ### Q: 技术指标可以自定义吗？
 

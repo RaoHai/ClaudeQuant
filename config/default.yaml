@@ -8,7 +8,7 @@ system:
 
 # 数据源配置
 data:
-  provider: tushare
+  provider: akshare  # 使用 AkShare 作为数据源
   cache_enabled: true
   cache_ttl: 900  # 15分钟缓存
 

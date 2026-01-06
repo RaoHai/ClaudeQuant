@@ -24,9 +24,8 @@ pip install -r requirements.txt
 编辑 `.env` 文件：
 
 ```bash
-# 已有 .env 文件，请填入你的 Tushare Token
+# 已有 .env 文件，请填入你的 数据源
 # 并配置持仓股票代码
-TUSHARE_TOKEN=你的token
 PORTFOLIO_SYMBOLS=600519,000858,601318
 ```
 
@@ -116,8 +115,7 @@ graph LR
 
 ## 常见问题
 
-### Q: Tushare Token 在哪获取？
-A: 访问 https://tushare.pro/ 注册并获取免费 Token
+### Q: 如何获取数据？
 
 ### Q: 如何添加更多持仓？
 A: 编辑 `.env` 文件中的 `PORTFOLIO_SYMBOLS`，用逗号分隔

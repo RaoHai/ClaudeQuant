@@ -155,7 +155,7 @@ Shell 脚本特点：
 - Python 3.9+
 - pandas
 - numpy
-- tushare
+- akshare
 - python-dotenv
 
 安装依赖：
@@ -168,7 +168,6 @@ pip install -r requirements.txt
 在 `.env` 文件中配置：
 
 ```env
-TUSHARE_TOKEN=your_token_here
 PORTFOLIO_SYMBOLS=600519,000858,601318
 LOG_LEVEL=INFO
 ```

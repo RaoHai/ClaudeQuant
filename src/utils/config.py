@@ -107,7 +107,7 @@ class Config:
 
     def get_data_provider(self) -> str:
         """获取数据提供者"""
-        return self.get('data.provider', 'tushare')
+        return self.get('data.provider', 'akshare')
 
     def get_initial_capital(self) -> float:
         """获取初始资金"""

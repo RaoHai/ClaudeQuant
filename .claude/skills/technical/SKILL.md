@@ -17,14 +17,12 @@
 - Python 3.9+
 - pandas
 - numpy
-- tushare
+- akshare
 - python-dotenv
 
 ## Configuration
 
-需要在 `.env` 文件中配置 Tushare Token：
 ```env
-TUSHARE_TOKEN=your_token_here
 ```
 
 技术指标参数可在 `config/default.yaml` 中配置：

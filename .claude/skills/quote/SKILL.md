@@ -16,14 +16,13 @@
 
 - Python 3.9+
 - pandas
-- tushare
-- python-dotenv
+- akshare
 
 ## Configuration
 
-需要在 `.env` 文件中配置 Tushare Token：
+无需配置，AkShare 完全免费。只需要在 `.env` 文件中配置持仓代码：
 ```env
-TUSHARE_TOKEN=your_token_here
+PORTFOLIO_SYMBOLS=600519,000858,601318
 ```
 
 ## Examples
@@ -85,4 +84,5 @@ Claude 会在以下情况自动调用此 skill：
   - 6开头 → 上海证券交易所（.SH）
   - 0/3开头 → 深圳证券交易所（.SZ）
   - 4/8开头 → 北京证券交易所（.BJ）
-- 行情数据可能有15分钟延迟
+- 使用 AkShare 数据源，来自东方财富网
+- 完全免费，无需注册或 Token
