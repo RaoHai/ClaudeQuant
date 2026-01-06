@@ -39,7 +39,7 @@ class QuoteProvider:
             行情字典
         """
         symbol = self._normalize_symbol(symbol)
-
+        logger.info("get_realtime_quote", symbol)
         try:
             # 获取最新日线数据（作为实时行情）
             today = datetime.now().strftime('%Y%m%d')

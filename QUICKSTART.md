@@ -27,7 +27,7 @@ pip install -r requirements.txt
 # 已有 .env 文件，请填入你的 Tushare Token
 # 并配置持仓股票代码
 TUSHARE_TOKEN=你的token
-PORTFOLIO_SYMBOLS=000001,600519,000858
+PORTFOLIO_SYMBOLS=600519,000858,601318
 ```
 
 ### 3. 测试 Skills
@@ -37,10 +37,10 @@ PORTFOLIO_SYMBOLS=000001,600519,000858
 ./skills/portfolio.sh
 
 # 测试行情获取
-./skills/quote.sh 000001
+./skills/quote.sh 600519
 
 # 测试技术分析
-./skills/technical.sh 000001
+./skills/technical.sh 600519
 
 # 生成完整分析报告
 ./skills/analyze.sh
@@ -59,7 +59,7 @@ Claude 会调用 `/portfolio` skill 获取实时行情并分析。
 
 ### 示例 2: 深度分析
 ```
-你：帮我分析一下平安银行(000001)的技术面
+你：帮我分析一下贵州茅台(600519)的技术面
 ```
 
 Claude 会调用 `/quote` 和 `/technical` skills 进行详细分析。
