@@ -1,10 +1,10 @@
-"""实时行情获取模块"""
+"""实时行情获取模块 - 基于 AkShare"""
 
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import pandas as pd
-import tushare as ts
+import akshare as ak
 
 from src.core.exceptions import DataProviderError
 from src.utils.logger import get_logger
@@ -14,19 +14,12 @@ logger = get_logger(__name__)
 
 
 class QuoteProvider:
-    """实时行情提供者"""
+    """实时行情提供者 - 使用 AkShare 数据源"""
 
     def __init__(self):
         """初始化"""
-        token = os.getenv('TUSHARE_TOKEN')
-        if not token:
-            raise DataProviderError("TUSHARE_TOKEN not set in environment")
-
-        ts.set_token(token)
-        self.pro = ts.pro_api()
         self.config = get_config()
-
-        logger.info("QuoteProvider initialized")
+        logger.info("QuoteProvider initialized with AkShare")
 
     def get_realtime_quote(self, symbol: str) -> Dict:
         """
@@ -39,35 +32,34 @@ class QuoteProvider:
             行情字典
         """
         symbol = self._normalize_symbol(symbol)
-        logger.info("get_realtime_quote", symbol)
         try:
-            # 获取最新日线数据（作为实时行情）
-            today = datetime.now().strftime('%Y%m%d')
-            df = self.pro.daily(ts_code=symbol, trade_date=today)
+            # 使用 AkShare 获取实时行情
+            # stock_zh_a_spot_em 返回全市场数据，我们需要筛选
+            df = ak.stock_zh_a_spot_em()
 
-            if df.empty:
-                # 如果今天没有数据，获取最近一个交易日
-                df = self.pro.daily(ts_code=symbol, start_date=(datetime.now() - timedelta(days=7)).strftime('%Y%m%d'))
-                if df.empty:
-                    raise DataProviderError(f"No quote data for {symbol}")
-                df = df.iloc[0:1]  # 取最新一条
+            # 筛选出指定股票
+            stock_data = df[df['代码'] == symbol.split('.')[0]]
 
-            row = df.iloc[0]
+            if stock_data.empty:
+                raise DataProviderError(f"No quote data for {symbol}")
 
+            row = stock_data.iloc[0]
+
+            # 映射字段
             quote = {
                 'symbol': symbol,
-                'name': self._get_stock_name(symbol),
-                'date': row['trade_date'],
-                'open': row['open'],
-                'high': row['high'],
-                'low': row['low'],
-                'close': row['close'],
-                'pre_close': row['pre_close'],
-                'change': row['change'],
-                'pct_change': row['pct_chg'],
-                'volume': row['vol'] * 100,  # 手 -> 股
-                'amount': row['amount'] * 1000,  # 千元 -> 元
-                'turnover_rate': row.get('turnover_rate', 0),
+                'name': row['名称'],
+                'date': datetime.now().strftime('%Y%m%d'),
+                'open': float(row['今开']),
+                'high': float(row['最高']),
+                'low': float(row['最低']),
+                'close': float(row['最新价']),
+                'pre_close': float(row['昨收']),
+                'change': float(row['涨跌额']),
+                'pct_change': float(row['涨跌幅']),
+                'volume': int(row['成交量']),
+                'amount': float(row['成交额']),
+                'turnover_rate': float(row.get('换手率', 0)),
             }
 
             logger.info(f"Got quote for {symbol}: {quote['close']}")
@@ -88,30 +80,44 @@ class QuoteProvider:
         Returns:
             DataFrame
         """
-        symbol = self._normalize_symbol(symbol)
+        symbol_code = self._normalize_symbol(symbol).split('.')[0]
         end_date = datetime.now().strftime('%Y%m%d')
-        start_date = (datetime.now() - timedelta(days=days * 2)).strftime('%Y%m%d')  # 多获取一些以确保有足够交易日
+        start_date = (datetime.now() - timedelta(days=days * 2)).strftime('%Y%m%d')
 
         try:
-            df = self.pro.daily(ts_code=symbol, start_date=start_date, end_date=end_date)
+            # 使用 AkShare 获取历史数据
+            # period="daily" 日线数据，adjust="qfq" 前复权
+            df = ak.stock_zh_a_hist(
+                symbol=symbol_code,
+                period="daily",
+                start_date=start_date,
+                end_date=end_date,
+                adjust="qfq"
+            )
 
             if df.empty:
                 raise DataProviderError(f"No historical data for {symbol}")
 
-            # 标准化列名
+            # 标准化列名（AkShare 返回的列名是中文）
             df = df.rename(columns={
-                'ts_code': 'symbol',
-                'trade_date': 'date',
-                'pct_chg': 'pct_change',
-                'vol': 'volume',
+                '日期': 'date',
+                '开盘': 'open',
+                '收盘': 'close',
+                '最高': 'high',
+                '最低': 'low',
+                '成交量': 'volume',
+                '成交额': 'amount',
+                '振幅': 'amplitude',
+                '涨跌幅': 'pct_change',
+                '涨跌额': 'change',
+                '换手率': 'turnover_rate',
             })
 
-            # 转换日期
-            df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
+            # 添加股票代码
+            df['symbol'] = symbol
 
-            # 转换成交量和金额
-            df['volume'] = df['volume'] * 100
-            df['amount'] = df['amount'] * 1000
+            # 转换日期格式
+            df['date'] = pd.to_datetime(df['date'])
 
             # 按日期升序排序
             df = df.sort_values('date').reset_index(drop=True)
@@ -146,17 +152,6 @@ class QuoteProvider:
                 continue
 
         return quotes
-
-    def _get_stock_name(self, symbol: str) -> str:
-        """获取股票名称"""
-        try:
-            df = self.pro.stock_basic(ts_code=symbol, fields='ts_code,name')
-            if not df.empty:
-                return df.iloc[0]['name']
-        except Exception as e:
-            logger.warning(f"Failed to get stock name for {symbol}: {e}")
-
-        return symbol
 
     def _normalize_symbol(self, symbol: str) -> str:
         """标准化股票代码"""

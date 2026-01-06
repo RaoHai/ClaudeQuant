@@ -4,6 +4,7 @@ numpy>=1.24.0
 
 # Data Source
 tushare>=1.3.0
+akshare>=1.12.0
 
 # CLI
 click>=8.1.0
