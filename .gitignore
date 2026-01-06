@@ -1,17 +1,61 @@
-node_modules/
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
 dist/
-.env
-*.log
-.DS_Store
+build/
+.eggs/
 
-# IDE
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Environment Variables
+.env
+.env.local
+
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+*.csv
+*.parquet
+*.h5
+*.pkl
+
+# Reports
+reports/*.md
+!reports/.gitkeep
 
 # Test coverage
-coverage/
+.coverage
+htmlcov/
+.pytest_cache/
 
-# Build artifacts
-*.tsbuildinfo
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Temporary files
+*.tmp
+*.bak
+*~
