@@ -1,0 +1,27 @@
+# 数据源配置
+
+# Tushare 配置
+tushare:
+  token: ${TUSHARE_TOKEN}  # 从环境变量读取
+  timeout: 30
+  retry: 3
+  retry_delay: 1  # 重试延迟 (秒)
+  fields:
+    daily:
+      - ts_code
+      - trade_date
+      - open
+      - high
+      - low
+      - close
+      - pre_close
+      - change
+      - pct_chg
+      - vol
+      - amount
+
+# AkShare 配置
+akshare:
+  timeout: 30
+  retry: 3
+  retry_delay: 1
