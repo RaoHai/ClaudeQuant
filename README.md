@@ -1,188 +1,170 @@
-# ClaudeQuant
+# ClaudeQuant - AI 持仓分析助手
 
-A股量化交易平台 - 基于 Claude Code 的轻量级量化回测系统
+基于 Claude Code 的 A股持仓智能分析助手。通过 Claude 的 AI 能力，自动分析你的股票持仓，提供技术面分析、行情追踪和操作建议。
 
-## 特性
+## 核心特性
 
-- **数据管理**: 支持 Tushare/AkShare 免费数据源，Parquet 格式高效存储
-- **策略开发**: 简洁的策略开发框架，内置双均线等经典策略模板
-- **回测引擎**: 事件驱动的回测引擎，支持手续费、滑点、印花税
-- **性能分析**: 自动计算夏普比率、最大回撤、年化收益等指标
-- **Markdown 报告**: 生成可读性强的回测报告，包含资金曲线图
-- **CLI 交互**: 命令行界面，易于使用和自动化
-- **无 UI 依赖**: 纯命令行 + Markdown，适合服务器环境
+- 🤖 **AI 驱动**: 利用 Claude 的智能分析能力
+- 📊 **实时行情**: 获取最新股票行情（15分钟延迟）
+- 📈 **技术分析**: 自动计算 MA、MACD、RSI、布林带等指标
+- 💡 **智能建议**: 基于技术指标给出买入/卖出/持有建议
+- 📝 **Markdown 报告**: 生成易读的分析报告
+- ⚡ **Skills 集成**: 通过 Claude Code Skills 对话式交互
 
 ## 快速开始
 
-### 1. 环境准备
-
-**要求**:
-- Python 3.9+
-- pip 或 Poetry
-
-**安装依赖**:
+### 1. 安装依赖
 
 ```bash
-# 使用 pip
 pip install -r requirements.txt
-
-# 或使用 Poetry
-poetry install
 ```
 
-**配置环境变量**:
+### 2. 配置持仓
+
+编辑 `.env` 文件（从 `.env.example` 复制）：
 
 ```bash
-# 复制环境变量模板
 cp .env.example .env
+```
 
-# 编辑 .env 文件，填入你的 Tushare Token
-# 注册地址: https://tushare.pro/
+配置你的持仓代码：
+
+```env
+# Tushare Token (注册: https://tushare.pro/)
 TUSHARE_TOKEN=your_token_here
+
+# 持仓股票代码（逗号分隔）
+PORTFOLIO_SYMBOLS=000001,600519,000858
 ```
 
-### 2. 下载数据
+### 3. 使用 Claude Code Skills
+
+在 Claude Code 中，你可以这样问：
+
+**"当前持仓的状况是怎样的？"**
+
+Claude 会自动调用 Skills 获取数据并分析。
+
+## Skills 命令
+
+### `/portfolio` - 查看持仓概况
 
 ```bash
-# 下载平安银行 (000001.SZ) 2023年全年数据
-python -m src.cli.main data download --symbol 000001 --start 20230101 --end 20231231
+./skills/portfolio.sh
 ```
 
-### 3. 运行回测
+显示所有持仓股票的实时行情和涨跌幅。
+
+### `/quote <代码>` - 获取实时行情
 
 ```bash
-# 运行双均线策略回测
-python -m src.cli.main backtest \
-  --strategy ma_cross \
-  --symbol 000001 \
-  --start 20230101 \
-  --end 20231231
+./skills/quote.sh 000001
 ```
 
-### 4. 查看报告
+获取指定股票的详细行情数据。
 
-回测完成后，报告将保存在 `reports/backtest/` 目录下：
+### `/technical <代码>` - 技术分析
 
 ```bash
-# 查看最新报告
-cat reports/backtest/latest.md
+./skills/technical.sh 000001
 ```
+
+对指定股票进行技术指标分析，包括：
+- 均线系统 (MA5/10/20/60)
+- MACD 指标
+- RSI 指标
+- 综合买卖信号
+
+### `/analyze` - 完整分析报告
+
+```bash
+./skills/analyze.sh
+```
+
+生成所有持仓股票的完整分析报告，保存为 Markdown 文件。
+
+## 使用场景
+
+### 场景 1: 每日盘后分析
+
+在 Claude Code 中问：
+
+> "帮我分析一下今天持仓的表现，有哪些需要关注的？"
+
+Claude 会：
+1. 调用 `/analyze` 生成报告
+2. 阅读报告内容
+3. 用自然语言总结关键信息
+4. 提供个性化建议
+
+### 场景 2: 单只股票深度分析
+
+在 Claude Code 中问：
+
+> "平安银行(000001)现在的技术面如何？"
+
+Claude 会：
+1. 调用 `/quote 000001` 获取实时行情
+2. 调用 `/technical 000001` 进行技术分析
+3. 分析各项指标的含义
+4. 给出操作建议
+
+### 场景 3: 市场情绪判断
+
+在 Claude Code 中问：
+
+> "我的持仓整体风险如何？需要调整吗？"
+
+Claude 会：
+1. 调用 `/portfolio` 查看概况
+2. 逐个分析技术指标
+3. 评估整体仓位风险
+4. 提供调仓建议
+
+## 技术指标说明
+
+### 均线 (MA)
+- **MA5/MA10**: 短期趋势
+- **MA20**: 中期趋势
+- **MA60**: 长期趋势
+- **金叉**: MA5 上穿 MA20，看涨信号
+- **死叉**: MA5 下穿 MA20，看跌信号
+
+### MACD
+- **多头**: histogram > 0，上涨趋势
+- **空头**: histogram < 0，下跌趋势
+- **金叉**: MACD 线上穿信号线
+- **死叉**: MACD 线下穿信号线
+
+### RSI (相对强弱指标)
+- **超买**: RSI > 70，可能回调
+- **超卖**: RSI < 30，可能反弹
+- **正常**: 30 < RSI < 70
+
+### 布林带 (Bollinger Bands)
+- **突破上轨**: 超买，可能回调
+- **突破下轨**: 超卖，可能反弹
+- **在轨道内**: 正常波动范围
 
 ## 项目结构
 
 ```
 ClaudeQuant/
-├── config/                  # 配置文件
-├── data/                    # 数据存储（Parquet + SQLite）
-├── reports/                 # Markdown 报告
-├── strategies/              # 策略库
-│   ├── templates/          # 策略模板
-│   └── custom/             # 用户自定义策略
-├── src/                     # 源代码
-│   ├── cli/                # CLI 命令
-│   ├── core/               # 核心类型和常量
-│   ├── data/               # 数据模块
-│   ├── strategy/           # 策略框架
-│   ├── backtest/           # 回测引擎
+├── .env                    # 持仓配置
+├── cli.py                  # CLI 工具
+├── config/
+│   └── default.yaml        # 系统配置
+├── skills/                 # Claude Code Skills
+│   ├── portfolio.sh        # 持仓概况
+│   ├── quote.sh            # 实时行情
+│   ├── technical.sh        # 技术分析
+│   └── analyze.sh          # 完整分析
+├── src/
+│   ├── quote/              # 行情获取
+│   ├── analysis/           # 技术分析
+│   ├── report/             # 报告生成
 │   └── utils/              # 工具函数
-└── README.md
-```
-
-## 使用指南
-
-### 数据管理
-
-```bash
-# 下载数据
-python -m src.cli.main data download -s 000001 --start 20230101 --end 20231231
-
-# 更新数据（增量）
-python -m src.cli.main data update -s 000001 --days 30
-
-# 查看数据信息
-python -m src.cli.main data info -s 000001
-
-# 列出所有已缓存的股票
-python -m src.cli.main data info
-
-# 清除缓存
-python -m src.cli.main data clear -s 000001 --confirm
-```
-
-### 策略回测
-
-```bash
-# 基础回测
-python -m src.cli.main backtest \
-  --strategy ma_cross \
-  --symbol 000001 \
-  --start 20230101 \
-  --end 20231231
-
-# 自定义策略参数
-python -m src.cli.main backtest \
-  --strategy ma_cross \
-  --symbol 000001 \
-  --start 20230101 \
-  --end 20231231 \
-  --params "fast_period=10,slow_period=30"
-
-# 指定初始资金
-python -m src.cli.main backtest \
-  --strategy ma_cross \
-  --symbol 000001 \
-  --start 20230101 \
-  --end 20231231 \
-  --capital 200000
-```
-
-## 开发自定义策略
-
-### 策略模板
-
-创建文件 `strategies/custom/my_strategy.py`:
-
-```python
-from src.strategy.base import Strategy
-from src.strategy.indicators import calculate_ma
-from src.core.types import Signal, SignalAction
-import pandas as pd
-
-class MyStrategy(Strategy):
-    def __init__(self, params=None):
-        default_params = {
-            'period': 20,
-        }
-        if params:
-            default_params.update(params)
-        super().__init__(default_params)
-        self.period = self.params['period']
-
-    def init(self, data: pd.DataFrame):
-        """初始化 - 计算指标"""
-        self.data = data.copy()
-        self.data['ma'] = calculate_ma(self.data['close'], self.period)
-
-    def next(self, bar: pd.Series):
-        """生成信号"""
-        # 你的策略逻辑
-        if bar['close'] > bar['ma'] and self.current_position == 0:
-            return self.create_signal(
-                action=SignalAction.BUY,
-                price=bar['close'],
-                quantity=100,
-                reason="Price above MA"
-            )
-
-        elif bar['close'] < bar['ma'] and self.current_position > 0:
-            return self.create_signal(
-                action=SignalAction.SELL,
-                price=bar['close'],
-                quantity=self.current_position,
-                reason="Price below MA"
-            )
-
-        return None
+└── reports/                # 分析报告输出
 ```
 
 ## 配置说明
@@ -190,94 +172,69 @@ class MyStrategy(Strategy):
 ### config/default.yaml
 
 ```yaml
-system:
-  data_dir: ./data
-  report_dir: ./reports
-  log_level: INFO
+# 技术分析配置
+analysis:
+  indicators:
+    ma:
+      periods: [5, 10, 20, 60]  # 均线周期
+    rsi:
+      period: 14
+      overbought: 70  # 超买线
+      oversold: 30    # 超卖线
 
-backtest:
-  initial_capital: 100000.0
-  commission:
-    stock: 0.0003  # 万三手续费
-    min_commission: 5.0
-  slippage: 0.0001
-
-risk:
-  max_position_size: 0.2  # 单仓位最大20%
-  max_positions: 10
+# 报告配置
+report:
+  history_days: 60  # 分析最近60天数据
 ```
 
-## 回测报告示例
+## 与 Claude 对话示例
 
-回测报告包含以下内容：
+**你**: 当前持仓的状况是怎样的？
 
-1. **基本信息**: 策略名称、股票代码、回测区间、初始/最终资金
-2. **收益统计**: 总收益率、年化收益率、最大回撤、夏普比率等
-3. **交易统计**: 交易次数、手续费、交易天数
-4. **资金曲线**: 可视化资产变化
-5. **回撤曲线**: 可视化回撤情况
-6. **交易明细**: 每笔交易的详细记录
+**Claude**:
+让我帮你查看持仓状况。
 
-## 性能指标说明
+*[调用 /portfolio skill]*
 
-| 指标 | 说明 |
-|------|------|
-| 总收益率 | 期间总收益百分比 |
-| 年化收益率 | 按年计算的收益率 |
-| 最大回撤 | 资产最大跌幅 |
-| 夏普比率 | 风险调整后收益（>1 较好，>2 优秀）|
-| 索提诺比率 | 只考虑下行风险的夏普比率 |
-| 卡玛比率 | 年化收益率 / 最大回撤 |
+根据最新数据，你持有的3只股票今日表现如下：
+- 平安银行(000001.SZ): 12.35元，涨1.2%
+- 贵州茅台(600519.SH): 1850.50元，跌0.8%
+- 五粮液(000858.SZ): 158.60元，涨2.3%
 
-## 常见问题
+需要我进一步分析技术面吗？
 
-### 1. Tushare Token 在哪里获取？
+---
 
-访问 https://tushare.pro/ 注册账号，在个人中心获取 Token。
+**你**: 帮我看看平安银行的技术指标
 
-### 2. 如何添加新的数据源（如 AkShare）？
+**Claude**:
+*[调用 /technical 000001]*
 
-在 `src/data/providers/` 目录下创建新的提供者类，继承 `DataProvider` 基类。
+平安银行(000001)当前技术面分析：
 
-### 3. 如何扩展回测指标？
+均线系统：
+- 当前价格在 MA5/MA10 上方，短期趋势向上
+- 在 MA20 下方，中期有压力
+- 近期出现金叉，是买入信号
 
-编辑 `src/backtest/metrics.py`，在 `MetricsCalculator` 类中添加新的指标计算方法。
+MACD：多头趋势，histogram 为正
 
-### 4. 回测结果不准确？
+RSI：45，处于正常区间
 
-检查以下设置：
-- 手续费率是否符合实际（默认万三）
-- 滑点设置是否合理
-- 数据是否完整（周末和节假日无交易）
+综合信号：🟢 **买入信号**
 
-## 路线图
+建议：多个指标显示买入信号，可考虑逢低加仓，建议分批买入控制风险。
 
-- [x] 数据下载和缓存
-- [x] 双均线策略示例
-- [x] 回测引擎
-- [x] Markdown 报告生成
-- [ ] MACD、RSI 等更多策略模板
-- [ ] Claude Skills 集成
-- [ ] 模拟交易账户
-- [ ] 多股票组合回测
-- [ ] 参数优化
+## 免责声明
 
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
+本工具仅供参考，不构成投资建议。股市有风险，投资需谨慎。
 
 ## 许可证
 
 MIT License
 
-## 致谢
-
-- [Tushare](https://tushare.pro/) - 提供 A股数据
-- [Claude Code](https://claude.com/claude-code) - AI 驱动的开发工具
-- 所有开源库的作者
-
 ---
 
-**ClaudeQuant** - 让量化交易更简单
+**ClaudeQuant** - 让 AI 成为你的投资助手
 
 Generated with [Claude Code](https://claude.com/claude-code)
